@@ -1,4 +1,5 @@
 import mysql.connector
+import bcrypt
 
 def get_connection():
     return mysql.connector.connect(
@@ -12,18 +13,31 @@ def get_connection():
 connect_db = get_connection
 
 # 3. User verification function for signin.py
-def verify_user(email, password):
+def verify_user(email, entered_password):
     try:
         conn = connect_db()
         cursor = conn.cursor()
-        
-        query = "SELECT * FROM users WHERE email = %s AND password = %s"
-        cursor.execute(query, (email, password))
-        user = cursor.fetchone()
-        
+
+        # 1. Fetch only the stored hash for this email
+        query = "SELECT password_hash FROM users WHERE email = %s"
+        cursor.execute(query, (email,))
+        result = cursor.fetchone()
+
         cursor.close()
         conn.close()
-        return user is not None
-    except mysql.connector.Error as err:
-        print(f"Database error: {err}")
+
+        if not result:
+            return False  # Email does not exist
+
+        stored_hash = result[0]  # This is the string stored in the database
+
+        # 2. Compare using bcrypt.checkpw
+        # Both must be encoded to utf-8 bytes
+        return bcrypt.checkpw(
+            entered_password.encode("utf-8"),
+            stored_hash.encode("utf-8")
+        )
+
+    except Exception as err:
+        print(f"Auth error: {err}")
         return False
