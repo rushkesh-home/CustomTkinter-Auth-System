@@ -42,8 +42,8 @@ def send_otp():
     # Generate 6-digit OTP
     generated_otp = "".join(str(random.randint(0, 9)) for _ in range(6))
 
-    sender_email = "rushkesh.home@gmail.com"
-    app_password = "tgtb fioy wafy hsql"  # Replace with your Gmail App Password
+    sender_email = "**************"
+    app_password = "**********"  # Replace with your Gmail App Password
 
     msg = EmailMessage()
     msg["Subject"] = "OTP for Password Reset"
